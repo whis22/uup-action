@@ -1,1 +1,47 @@
+name: Builds
 
+on:
+  workflow_dispatch:
+    inputs:
+        filebin_code:
+            required: true
+            type: string
+            #default: "0uv3y9tjqm0hjb51" 
+            
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Importing Files
+        run: |
+           mkdir win
+           cd win
+           curl -o filebin.zip https://filebin.net/archive/${{ inputs.filebin_code }}/zip
+           tar -xf filebin.zip
+           del filebin.zip
+           ren *.zip win.zip
+           tar -xf win.zip
+           echo f | xcopy /f /y .\files\converter_multi ..\files\converter_multi
+           echo f | xcopy /f /y .\files\converter_windows ..\files\converter_windows
+           echo f | xcopy /f /y ConvertConfig.ini ..\ConvertConfig.ini
+           echo f | xcopy /f /y CustomAppsList.txt ..\CustomAppsList.txt
+           echo f | xcopy /f /y uup_download_windows.cmd ..\start.cmd
+           cd ..
+        
+      - name: Building Windows Image
+        run: ./start.cmd
+        
+      - name: Checking Directories
+        run: |
+           dir
+           ren *.ISO Windows.iso
+        
+      - name: Upload Windows ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows.iso
+          path: Windows.iso
+          retention-days: 7
