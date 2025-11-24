@@ -42,6 +42,5 @@ jobs:
       - name: Upload Windows ISO artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Windows.iso
           path: Windows.iso
           retention-days: 7
